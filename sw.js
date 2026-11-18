@@ -4,7 +4,7 @@
    and falls back to the saved copy when you're offline.
    Bump VERSION whenever you upload changed files.
    ============================================================ */
-const VERSION = 'dashboard-v5';
+const VERSION = 'dashboard-v6';
 const SHELL = [
   './', 'index.html', 'calendar.css', 'calendar.js', 'config.js', 'sync-shim.js', 'sync.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'
