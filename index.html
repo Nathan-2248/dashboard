@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dashboard</title>
+<meta name="theme-color" content="#141720">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dashboard">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script src="config.js"></script>
+<script src="sync-shim.js"></script>
+
+<style>
+/* ============================================================
+   ITALY 2028
+   ============================================================ */
+.it-wrap{
+  display:grid;
+  grid-template-columns:1fr 1.2fr;
+  grid-template-rows:1fr 1fr;
+  gap:16px;
+  height:calc(100vh - 170px);
+  min-height:560px;
+}
+.it-panel{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:16px;
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  min-height:0;overflow:hidden;
+}
+.it-dict{grid-row:1 / span 2}
+.it-panel-title{
+  font-size:11px;font-family:var(--font-mono);
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-secondary);margin-bottom:12px;
+}
+.it-search{width:100%;margin-bottom:12px}
+.it-split{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0}
+.it-section{flex:1;display:flex;flex-direction:column;min-height:0}
+.it-section + .it-section{border-top:1px solid var(--border);padding-top:12px}
+.it-section-title{
+  font-size:10px;font-family:var(--font-mono);
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:8px;
+}
+.it-add{display:flex;gap:6px;margin-bottom:8px}
+.it-add input{flex:1;min-width:0}
+.it-list{flex:1;overflow-y:auto;min-height:0}
+.it-row{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 4px;border-bottom:1px solid var(--border);font-size:13px;
+}
+.it-row-it{flex:1;font-weight:600;color:var(--text-primary);word-break:break-word}
+.it-row-en{flex:1;color:var(--text-secondary);word-break:break-word}
+.it-del{color:var(--text-muted);font-size:13px;padding:2px 6px;border-radius:4px;transition:all var(--transition)}
+.it-del:hover{background:var(--accent-red-dim);color:var(--accent-red)}
+.it-empty{color:var(--text-muted);font-size:12px;padding:8px 4px}
+
+.it-flash-controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.it-card{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;padding:14px;text-align:center;cursor:pointer;min-height:0;
+  border:1px dashed var(--border-light);border-radius:var(--radius-lg);
+  background:var(--accent-blue-dim);user-select:none;
+  transition:border-color var(--transition);
+}
+.it-card:hover{border-color:var(--accent-blue)}
+.it-front{font-size:24px;font-weight:700}
+.it-back{font-size:20px;color:var(--accent-green);min-height:28px}
+.it-hint{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.it-flash-foot{
+  display:flex;justify-content:space-between;margin-top:10px;
+  font-size:11px;color:var(--text-muted);font-family:var(--font-mono);
+}
+.it-notes{
+  flex:1;width:100%;resize:none;min-height:0;
+  padding:12px;font-size:14px;line-height:1.7;
+  background:var(--bg-secondary);
+}
+
+@media(max-width:900px){
+  .it-wrap{grid-template-columns:1fr;grid-template-rows:auto;height:auto}
+  .it-dict{grid-row:auto;height:70vh}
+  .it-panel{min-height:300px}
+}
+
+/* ---------- Italy: notes + savings split ---------- */
+.it-split-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  min-height:0;
+}
+.it-b-goalrow{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.it-b-goalrow label{font-size:11px;font-family:var(--font-mono);color:var(--text-muted);letter-spacing:.5px;white-space:nowrap}
+.it-b-goalrow input{flex:1;min-width:0}
+.it-b-stats{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}
+.it-b-saved{font-size:22px;font-weight:700;font-family:var(--font-mono);color:var(--text-primary)}
+.it-b-pct{font-size:13px;font-family:var(--font-mono);color:var(--accent-green)}
+.it-b-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.it-b-fill{
+  height:100%;width:0;
+  background:linear-gradient(90deg,var(--accent-blue),var(--accent-green));
+  border-radius:4px;transition:width .4s ease;
+}
+.it-b-meta{font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin:6px 0 10px}
+.it-b-entry-amt{font-family:var(--font-mono);font-weight:600;color:var(--accent-green);white-space:nowrap}
+.it-b-entry-amt.neg{color:var(--accent-red)}
+.it-b-entry-date{font-size:10px;font-family:var(--font-mono);color:var(--text-muted);white-space:nowrap}
+
+@media(max-width:900px){
+  .it-split-row{grid-template-columns:1fr}
+}
+
+.it-count{
+  margin-left:6px;padding:1px 7px;border-radius:10px;
+  background:var(--border);color:var(--text-secondary);
+  font-size:10px;letter-spacing:0;text-transform:none;
+}
+
+.it-b-hide .blurable{filter:blur(8px);user-select:none;transition:filter .2s}
+
+</style>
+<style>
+/* ============================================================
+   CSS VARIABLES & RESET
+   ============================================================ */
+:root {
+  --bg-primary: #0d0f12;
+  --bg-secondary: #141720;
+  --bg-card: #1a1d27;
+  --bg-hover: #20243a;
+  --border: #2a2d3e;
+  --border-light: #353854;
+  --text-primary: #e8eaf2;
+  --text-secondary: #8a8fa8;
+  --text-muted: #565a72;
+  --accent-blue: #4f8ef7;
+  --accent-blue-dim: rgba(79,142,247,0.15);
+  --accent-green: #2dd4a0;
+  --accent-green-dim: rgba(45,212,160,0.15);
+  --accent-orange: #f5a623;
+  --accent-orange-dim: rgba(245,166,35,0.12);
+  --accent-red: #e05c5c;
+  --accent-red-dim: rgba(224,92,92,0.12);
+  --accent-purple: #9b7df7;
+  --status-none: #444760;
+  --status-progress: #f5a623;
+  --status-done: #2dd4a0;
+  --status-failed: #e05c5c;
+  --font-mono: 'Courier New', Courier, monospace;
+  --radius: 6px;
+  --radius-lg: 12px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  --transition: 0.18s ease;
+}
+[data-theme="light"] {
+  --bg-primary: #f0f2f8;
+  --bg-secondary: #e4e7f0;
+  --bg-card: #ffffff;
+  --bg-hover: #ebedf7;
+  --border: #d0d4e8;
+  --border-light: #c0c5dc;
+  --text-primary: #1a1d2e;
+  --text-secondary: #505470;
+  --text-muted: #8a8fa8;
+  --accent-blue: #3a7ef5;
+  --accent-blue-dim: rgba(58,126,245,0.1);
+  --status-none: #b0b5cc;
+  --shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family: 'Georgia', serif;
+  background:var(--bg-primary);
+  color:var(--text-primary);
+  min-height:100vh;
+  font-size:14px;
+  line-height:1.6;
+  transition:background var(--transition), color var(--transition);
+}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+input,textarea,select{font-family:inherit;color:inherit;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:7px 10px;font-size:13px;outline:none;transition:border var(--transition)}
+input:focus,textarea:focus,select:focus{border-color:var(--accent-blue)}
+select option{background:var(--bg-secondary)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg-primary)}
+::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:4px}
+
+/* ============================================================
+   TOP BANNER / DASHBOARD BAR
+   ============================================================ */
+#top-bar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:var(--bg-secondary);
+  border-bottom:1px solid var(--border);
+  padding:0 16px;
+  box-shadow:0 2px 20px rgba(0,0,0,0.3);
+  display:flex;align-items:stretch;gap:0;
+  height:54px;
+  overflow:hidden;
+}
+.bar-section{
+  display:flex;align-items:center;gap:10px;
+  padding:0 16px;
+  border-right:1px solid var(--border);
+  flex-shrink:0;
+  font-size:12px;
+}
+.bar-section:last-child{border-right:none}
+.bar-section.grow{flex:1;overflow:hidden}
+.bar-logo{
+  font-family:var(--font-mono);
+  font-size:15px;
+  font-weight:700;
+  color:var(--accent-blue);
+  letter-spacing:2px;
+  white-space:nowrap;
+}
+.bar-date{
+  color:var(--text-secondary);
+  font-size:11px;
+  white-space:nowrap;
+}
+.bar-stat{display:flex;flex-direction:column;align-items:center;gap:1px}
+.bar-stat-value{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-primary);line-height:1}
+.bar-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px}
+.progress-bar-wrap{
+  display:flex;flex-direction:column;gap:3px;min-width:120px;
+}
+.progress-bar-track{
+  height:4px;background:var(--border);border-radius:2px;overflow:hidden;
+}
+.progress-bar-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-green));
+  border-radius:2px;transition:width 0.4s ease;
+}
+.progress-text{font-size:10px;color:var(--text-muted)}
+
+/* Deadlines in top bar */
+.deadlines-scroll{
+  display:flex;align-items:center;gap:10px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  padding:0 4px;
+}
+.deadlines-scroll::-webkit-scrollbar{display:none}
+.deadline-chip{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:3px 10px 3px 6px;
+  white-space:nowrap;
+  font-size:11px;
+  flex-shrink:0;
+  cursor:pointer;
+}
+.deadline-chip:hover{border-color:var(--accent-blue)}
+.deadline-chip.urgent{border-color:var(--accent-red);background:var(--accent-red-dim)}
+.deadline-chip.soon{border-color:var(--accent-orange);background:var(--accent-orange-dim)}
+.deadline-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.deadline-dot.urgent{background:var(--accent-red)}
+.deadline-dot.soon{background:var(--accent-orange)}
+.deadline-dot.ok{background:var(--accent-green)}
+.chip-countdown{font-family:var(--font-mono);color:var(--text-secondary)}
+.bar-btn{
+  padding:5px 12px;border-radius:var(--radius);
+  font-size:11px;letter-spacing:0.5px;
+  background:var(--bg-card);border:1px solid var(--border);
+  color:var(--text-secondary);transition:all var(--transition);
+  white-space:nowrap;
+}
+.bar-btn:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+.bar-btn.active{background:var(--accent-blue-dim);border-color:var(--accent-blue);color:var(--accent-blue)}
+#theme-toggle{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--bg-card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;transition:all var(--transition);
+  flex-shrink:0;
+}
+#theme-toggle:hover{border-color:var(--accent-blue);transform:scale(1.1)}
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+#main{margin-top:54px;padding:24px 20px;max-width:1600px;margin-left:auto;margin-right:auto;}
+
+/* ============================================================
+   SECTION HEADERS
+   ============================================================ */
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+.section-title{
+  font-size:11px;font-family:var(--font-mono);
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-muted);
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::before{
+  content:'';display:block;width:3px;height:14px;
+  border-radius:2px;background:var(--accent-blue);
+}
+.section-title.green::before{background:var(--accent-green)}
+.section-title.orange::before{background:var(--accent-orange)}
+.section-title.purple::before{background:var(--accent-purple)}
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+.view{display:none}
+.view.active{display:block}
+
+/* ============================================================
+   TASK GRID
+   ============================================================ */
+.task-grid{
+  display:grid;
+  grid-template-columns:1.2fr 1fr 1fr 1fr;
+  gap:16px;
+  align-items:start;
+}
+@media(max-width:1100px){.task-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){.task-grid{grid-template-columns:1fr}}
+
+/* ============================================================
+   CARDS / LISTS
+   ============================================================ */
+.list-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:16px;
+  box-shadow:var(--shadow);
+  min-height:300px;
+}
+.list-card.drag-over{
+  border-color:var(--accent-blue);
+  background:var(--accent-blue-dim);
+}
+.list-card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.list-card-title{
+  font-size:11px;font-family:var(--font-mono);
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-secondary);
+  display:flex;align-items:center;gap:6px;
+}
+.list-badge{
+  background:var(--border);
+  color:var(--text-muted);
+  font-size:10px;padding:1px 6px;border-radius:10px;
+  font-family:var(--font-mono);
+}
+
+/* ============================================================
+   ADD TASK FORM
+   ============================================================ */
+.add-task-form{
+  display:flex;flex-direction:column;gap:8px;
+  margin-bottom:14px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
+.add-task-row{display:flex;gap:6px}
+.add-task-row input,.add-task-row select{flex:1;min-width:0}
+.add-task-row select{flex:0 0 auto;max-width:150px}
+.btn-add{
+  padding:7px 14px;border-radius:var(--radius);
+  background:var(--accent-blue);color:#fff;
+  font-size:12px;font-weight:600;letter-spacing:0.5px;
+  transition:all var(--transition);flex-shrink:0;
+}
+.btn-add:hover{opacity:0.85;transform:translateY(-1px)}
+.btn-add.green{background:var(--accent-green);color:#0d0f12}
+
+/* ============================================================
+   TASK ITEMS
+   ============================================================ */
+.task-list{
+  display:flex;flex-direction:column;gap:6px;
+  min-height:60px;
+}
+.task-item{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg-secondary);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:8px 10px;
+  cursor:grab;
+  transition:all var(--transition);
+  user-select:none;
+}
+.task-item:hover{border-color:var(--border-light);background:var(--bg-hover)}
+.task-item.dragging{opacity:0.4;transform:scale(0.97)}
+.task-item.completed .task-name{text-decoration:line-through;color:var(--text-muted)}
+
+/* Status circle */
+.status-btn{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid var(--status-none);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:9px;cursor:pointer;
+  transition:all var(--transition);
+}
+.status-btn[data-status="none"]{border-color:var(--status-none);background:transparent;color:transparent}
+.status-btn[data-status="progress"]{border-color:var(--status-progress);background:var(--accent-orange-dim);color:var(--status-progress)}
+.status-btn[data-status="done"]{border-color:var(--status-done);background:var(--accent-green-dim);color:var(--status-done)}
+.status-btn[data-status="failed"]{border-color:var(--status-failed);background:var(--accent-red-dim);color:var(--status-failed)}
+
+.task-name{flex:1;font-size:13px;min-width:0;word-break:break-word}
+.module-tag{
+  font-size:9px;font-family:var(--font-mono);letter-spacing:0.5px;
+  padding:2px 6px;border-radius:10px;flex-shrink:0;
+  background:var(--accent-blue-dim);color:var(--accent-blue);
+  border:1px solid rgba(79,142,247,0.2);
+  max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.task-actions{display:flex;gap:4px;flex-shrink:0}
+.task-btn{
+  width:22px;height:22px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text-muted);
+  transition:all var(--transition);
+}
+.task-btn:hover{background:var(--border);color:var(--text-primary)}
+.task-btn.delete:hover{background:var(--accent-red-dim);color:var(--accent-red)}
+.task-btn.move:hover{background:var(--accent-green-dim);color:var(--accent-green)}
+.task-btn.move-list{font-size:10px;}
+
+/* Module colours */
+.module-tag[data-module="BOIL"]{background:rgba(79,142,247,0.12);color:#4f8ef7;border-color:rgba(79,142,247,0.25)}
+.module-tag[data-module="CrimJust"]{background:rgba(155,125,247,0.12);color:#9b7df7;border-color:rgba(155,125,247,0.25)}
+.module-tag[data-module="CrimLaw"]{background:rgba(224,92,92,0.12);color:#e05c5c;border-color:rgba(224,92,92,0.25)}
+.module-tag[data-module="FinAcc"]{background:rgba(45,212,160,0.12);color:#2dd4a0;border-color:rgba(45,212,160,0.25)}
+.module-tag[data-module="CivProc"]{background:rgba(245,166,35,0.12);color:#f5a623;border-color:rgba(245,166,35,0.25)}
+.module-tag[data-module="Contracts"]{background:rgba(90,200,240,0.12);color:#5ac8f0;border-color:rgba(90,200,240,0.25)}
+.module-tag[data-module="CrimProc"]{background:rgba(240,150,90,0.12);color:#f0965a;border-color:rgba(240,150,90,0.25)}
+.module-tag[data-module="Evidence"]{background:rgba(196,214,79,0.12);color:#c4d64f;border-color:rgba(196,214,79,0.25)}
+.module-tag[data-module="ManAcc"]{background:rgba(63,191,127,0.12);color:#3fbf7f;border-color:rgba(63,191,127,0.25)}
+.module-tag[data-module="PIL"]{background:rgba(180,125,247,0.12);color:#b47df7;border-color:rgba(180,125,247,0.25)}
+.module-tag[data-module="Tutoring"]{background:rgba(255,107,157,0.12);color:#ff6b9d;border-color:rgba(255,107,157,0.25)}
+.module-tag[data-module="Admin"]{background:rgba(160,164,184,0.12);color:#a0a4b8;border-color:rgba(160,164,184,0.25)}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state{
+  text-align:center;padding:24px 12px;
+  color:var(--text-muted);font-size:12px;
+}
+.empty-state-icon{font-size:24px;margin-bottom:6px;opacity:0.4}
+
+/* ============================================================
+   MOVE MODAL
+   ============================================================ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,0.7);
+  display:none;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--bg-card);
+  border:1px solid var(--border-light);
+  border-radius:var(--radius-lg);
+  padding:24px;
+  min-width:280px;max-width:400px;width:90%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.modal-title{font-size:13px;font-family:var(--font-mono);letter-spacing:1px;margin-bottom:16px;color:var(--text-secondary)}
+.modal-options{display:flex;flex-direction:column;gap:8px}
+.modal-opt-btn{
+  padding:10px 14px;border-radius:var(--radius);
+  background:var(--bg-secondary);border:1px solid var(--border);
+  text-align:left;font-size:13px;color:var(--text-primary);
+  transition:all var(--transition);
+}
+.modal-opt-btn:hover{border-color:var(--accent-blue);background:var(--accent-blue-dim);color:var(--accent-blue)}
+.modal-cancel{margin-top:10px;width:100%;padding:8px;border-radius:var(--radius);font-size:12px;color:var(--text-muted);background:var(--bg-secondary);border:1px solid var(--border)}
+.modal-cancel:hover{color:var(--text-primary)}
+
+/* ============================================================
+   DEADLINE PANEL
+   ============================================================ */
+.deadline-panel{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:20px;
+  margin-bottom:24px;
+}
+.deadline-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:14px}
+.deadline-item{
+  background:var(--bg-secondary);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px 12px;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.deadline-item.urgent{border-left:3px solid var(--accent-red)}
+.deadline-item.soon{border-left:3px solid var(--accent-orange)}
+.deadline-item.ok{border-left:3px solid var(--accent-green)}
+.deadline-info{flex:1}
+.deadline-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.deadline-time{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.deadline-countdown{font-size:11px;font-family:var(--font-mono);margin-top:3px}
+.deadline-countdown.urgent{color:var(--accent-red)}
+.deadline-countdown.soon{color:var(--accent-orange)}
+.deadline-countdown.ok{color:var(--accent-green)}
+.btn-del-deadline{color:var(--text-muted);font-size:14px;padding:2px;border-radius:3px;line-height:1}
+.btn-del-deadline:hover{color:var(--accent-red)}
+.add-deadline-row{
+  display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;
+  margin-top:14px;
+}
+@media(max-width:600px){.add-deadline-row{grid-template-columns:1fr 1fr;}}
+
+/* Add event modal */
+#event-modal .modal-box{min-width:300px}
+.event-form{display:flex;flex-direction:column;gap:10px}
+.event-form label{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);letter-spacing:0.5px;display:block;margin-bottom:3px}
+.event-form input{width:100%}
+.btn-primary{
+  padding:9px 18px;border-radius:var(--radius);
+  background:var(--accent-blue);color:#fff;
+  font-size:13px;font-weight:600;
+  transition:all var(--transition);
+}
+.btn-primary:hover{opacity:0.85}
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+.notes-area{
+  display:block;
+  width:100%;height:calc(100vh - 170px);min-height:420px;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:20px;
+  resize:vertical;
+  font-size:14px;
+  line-height:1.8;
+  color:var(--text-primary);
+  transition:border var(--transition);
+}
+.notes-area:focus{border-color:var(--accent-blue);outline:none}
+.notes-status{font-size:11px;color:var(--text-muted);margin-top:8px;font-family:var(--font-mono)}
+
+/* ============================================================
+   NAV TABS
+   ============================================================ */
+.main-nav{
+  display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;
+}
+.nav-tab{
+  padding:7px 16px;border-radius:var(--radius);
+  font-size:12px;font-family:var(--font-mono);letter-spacing:0.5px;
+  border:1px solid var(--border);color:var(--text-muted);
+  transition:all var(--transition);
+}
+.nav-tab:hover{border-color:var(--border-light);color:var(--text-secondary)}
+.nav-tab.active{
+  background:var(--accent-blue);color:#fff;
+  border-color:var(--accent-blue);
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.flex-row{display:flex;align-items:center;gap:8px}
+.spacer{flex:1}
+.text-muted{color:var(--text-muted)}
+.mt-16{margin-top:16px}
+.small-btn{
+  padding:5px 10px;border-radius:var(--radius);font-size:11px;
+  border:1px solid var(--border);color:var(--text-muted);
+  transition:all var(--transition);
+}
+.small-btn:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+</style>
+<link rel="stylesheet" href="calendar.css">
+</head>
+<body>
+
+<!-- ============================================================
+     TOP BAR
+     ============================================================ -->
+<div id="top-bar">
+  <!-- Logo & Date -->
+  <div class="bar-section">
+    <span class="bar-logo">Task Manager</span>
+    <div>
+      <div id="bar-date" class="bar-date" style="font-family:var(--font-mono)"></div>
+      <div id="bar-time" class="bar-date" style="font-family:var(--font-mono);margin-top:1px"></div>
+    </div>
+  </div>
+
+  <!-- Task Stats -->
+  <div class="bar-section">
+    <div class="bar-stat">
+      <span class="bar-stat-value" id="bar-home-countdown" style="font-size:13px;color:var(--accent-green)">--</span>
+      <span class="bar-stat-label">Countdown to Home</span>
+    </div>
+    
+  </div>
+
+  <!-- Deadlines -->
+  <div class="bar-section grow">
+    <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;font-family:var(--font-mono);letter-spacing:0.5px">DEADLINES</span>
+    <div class="deadlines-scroll" id="bar-deadlines"></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="bar-section" style="gap:6px">
+    <button class="bar-btn" onclick="switchView('tasks')" id="nav-tasks-btn">Tasks</button>
+    <button class="bar-btn" onclick="switchView('deadlines')" id="nav-deadlines-btn">Deadlines</button>
+    <button class="bar-btn" onclick="switchView('calendar')" id="nav-cal-btn">Calendar</button>
+    <button class="bar-btn" onclick="switchView('notes')" id="nav-notes-btn">Notes</button>
+	<button class="bar-btn" onclick="switchView('italy')" id="nav-italy-btn">Italy 2028</button>
+    <button id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button id="settings-btn" onclick="openSettings()" title="Settings and sync">⚙<span id="sync-dot"></span></button>
+  </div>
+</div>
+
+
+
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<div id="main">
+
+  <!-- ====== TASKS VIEW ====== -->
+  <div class="view active" id="view-tasks">
+    <div class="task-grid">
+
+      <!-- MASTER LIST -->
+      <div class="list-card" id="drop-master" style="grid-row: 1 / 4;" ondragover="onDragOver(event,'master')" ondrop="onDrop(event,'master')" ondragleave="onDragLeave(event)">
+        <div class="list-card-header">
+          <span class="list-card-title" style="color:var(--accent-blue)">
+            <span style="font-size:14px"></span> Master List
+            <span class="list-badge" id="badge-master">0</span>
+          </span>
+        </div>
+        <div class="add-task-form">
+          <div class="add-task-row">
+            <input type="text" id="master-input" placeholder="Add task…" onkeydown="if(event.key==='Enter')addTask('master')">
+            <select id="master-module">
+              <option value="">Module</option>
+          <option>BOIL</option>
+          <option>CrimJust</option>
+          <option>CrimLaw</option>
+          <option>FinAcc</option>
+          <option>CivProc</option>
+          <option>Contracts</option>
+          <option>CrimProc</option>
+          <option>Evidence</option>
+          <option>ManAcc</option>
+          <option>PIL</option>
+          <option>Tutoring</option>
+          <option>Admin</option>
+            </select>
+          </div>
+          <button class="btn-add" onclick="addTask('master')">+ Add</button>
+        </div>
+        <div class="task-list" id="list-master"></div>
+      </div>
+
+      <!-- MONDAY -->
+	  <div class="list-card" id="drop-monday" ondragover="onDragOver(event,'monday')" ondrop="onDrop(event,'monday')" ondragleave="onDragLeave(event)">
+		<div class="list-card-header">
+		  <span class="list-card-title" style="color:var(--accent-green)">
+			<span style="font-size:14px"> </span> Monday
+			<span class="list-badge" id="badge-monday">0</span>
+		  </span>
+		</div>
+		<div class="add-task-form">
+		  <div class="add-task-row">
+			<input type="text" id="monday-input" placeholder="Add task…" onkeydown="if(event.key==='Enter')addTask('monday')">
+			<select id="monday-module">
+			  <option value="">Module</option>
+          <option>BOIL</option>
+          <option>CrimJust</option>
+          <option>CrimLaw</option>
+          <option>FinAcc</option>
+          <option>CivProc</option>
+          <option>Contracts</option>
+          <option>CrimProc</option>
+          <option>Evidence</option>
+          <option>ManAcc</option>
+          <option>PIL</option>
+          <option>Tutoring</option>
+          <option>Admin</option>
+			</select>
+		  </div>
+		  <button class="btn-add green" onclick="addTask('monday')">+ Add</button>
+		</div>
+		<div class="task-list" id="list-monday"></div>
+	  </div>
+
+<!-- TUESDAY -->
+<div class="list-card" id="drop-tuesday" ondragover="onDragOver(event,'tuesday')" ondrop="onDrop(event,'tuesday')" ondragleave="onDragLeave(event)">
+  <div class="list-card-header">
+    <span class="list-card-title" style="color:var(--accent-blue)">
+      <span style="font-size:14px"> </span> Tuesday
+      <span class="list-badge" id="badge-tuesday">0</span>
+    </span>
+  </div>
+  <div class="add-task-form">
+    <div class="add-task-row">
+      <input type="text" id="tuesday-input" placeholder="Add task…" onkeydown="if(event.key==='Enter')addTask('tuesday')">
+      <select id="tuesday-module">
+        <option value="">Module</option>
+          <option>BOIL</option>
+          <option>CrimJust</option>
+          <option>CrimLaw</option>
+          <option>FinAcc</option>
+          <option>CivProc</option>
+          <option>Contracts</option>
+          <option>CrimProc</option>
+          <option>Evidence</option>
+          <option>ManAcc</option>
+          <option>PIL</option>
+          <option>Tutoring</option>
+          <option>Admin</option>
+      </select>
+    </div>
+    <button class="btn-add" onclick="addTask('tuesday')">+ Add</button>
+  </div>
+  <div class="task-list" id="list-tuesday"></div>
+</div>
+
+<!-- WEDNESDAY -->
+<div class="list-card" id="drop-wednesday" ondragover="onDragOver(event,'wednesday')" ondrop="onDrop(event,'wednesday')" ondragleave="onDragLeave(event)">
+  <div class="list-card-header">
+    <span class="list-card-title" style="color:var(--accent-orange)">
+      <span style="font-size:14px"> </span> Wednesday
+      <span class="list-badge" id="badge-wednesday">0</span>
+    </span>
+  </div>
+  <div class="add-task-form">
+    <div class="add-task-row">
+      <input type="text" id="wednesday-input" placeholder="Add task…" onkeydown="if(event.key==='Enter')addTask('wednesday')">
+      <select id="wednesday-module">
+        <option value="">Module</option>
+          <option>BOIL</option>
+          <option>CrimJust</option>
+          <option>CrimLaw</option>
+          <option>FinAcc</option>
+          <option>CivProc</option>
+          <option>Contracts</option>
+          <option>CrimProc</option>
+          <option>Evidence</option>
+          <option>ManAcc</option>
+          <option>PIL</option>
+          <option>Tutoring</option>
+          <option>Admin</option>
+      </select>
+    </div>
+    <button class="btn-add" style="background:var(--accent-orange);color:#1a1d2e" onclick="addTask('wednesday')">+ Add</button>
+  </div>
+  <div class="task-list" id="list-wednesday"></div>
+</div>
+
+<!-- THURSDAY -->
+<div class="list-card" id="drop-thursday" ondragover="onDragOver(event,'thursday')" ondrop="onDrop(event,'thursday')" ondragleave="onDragLeave(event)">
+  <div class="list-card-header">
+    <span class="list-card-title" style="color:var(--accent-purple)">
+      <span style="font-size:14px"> </span> Thursday
+      <span class="list-badge" id="badge-thursday">0</span>
+    </span>
+  </div>
+  <div class="add-task-form">
+    <div class="add-task-row">
+      <input type="text" id="thursday-input" placeholder="Add task…" onkeydown="if(event.key==='Enter')addTask('thursday')">
+      <select id="thursday-module">
+        <option value="">Module</option>
+          <option>BOIL</option>
+          <option>CrimJust</option>
+          <option>CrimLaw</option>
+          <option>FinAcc</option>
+          <option>CivProc</option>
+          <option>Contracts</option>
+          <option>CrimProc</option>
+          <option>Evidence</option>
+          <option>ManAcc</option>
+          <option>PIL</option>
+          <option>Tutoring</option>
+          <option>Admin</option>
+      </select>
+    </div>
+    <button class="btn-add" style="background:var(--accent-purple)" onclick="addTask('thursday')">+ Add</button>
+  </div>
+  <div class="task-list" id="list-thursday"></div>
+</div>
+
+<!-- FRIDAY -->
+<div class="list-card" id="drop-friday" ondragover="onDragOver(event,'friday')" ondrop="onDrop(event,'friday')" ondragleave="onDragLeave(event)">
+  <div class="list-card-header">
+    <span class="list-card-title" style="color:#5ac8f0">
+      <span style="font-size:14px"> </span> Friday
+      <span class="list-badge" id="badge-friday">0</span>
+    </span>
+  </div>
+  <div class="add-task-form">
+    <div class="add-task-row">
+      <input type="text" id="friday-input" placeholder="Add task…" onkeydown="if(event.key==='Enter')addTask('friday')">
+      <select id="friday-module">
+        <option value="">Module</option>
+          <option>BOIL</option>
+          <option>CrimJust</option>
+          <option>CrimLaw</option>
+          <option>FinAcc</option>
+          <option>CivProc</option>
+          <option>Contracts</option>
+          <option>CrimProc</option>
+          <option>Evidence</option>
+          <option>ManAcc</option>
+          <option>PIL</option>
+          <option>Tutoring</option>
+          <option>Admin</option>
+      </select>
+    </div>
+    <button class="btn-add" style="background:#5ac8f0;color:#0d0f12" onclick="addTask('friday')">+ Add</button>
+  </div>
+  <div class="task-list" id="list-friday"></div>
+</div>
+
+<!-- SATURDAY -->
+<div class="list-card" id="drop-saturday" ondragover="onDragOver(event,'saturday')" ondrop="onDrop(event,'saturday')" ondragleave="onDragLeave(event)">
+  <div class="list-card-header">
+    <span class="list-card-title" style="color:#f0965a">
+      <span style="font-size:14px"> </span> Saturday
+      <span class="list-badge" id="badge-saturday">0</span>
+    </span>
+  </div>
+  <div class="add-task-form">
+    <div class="add-task-row">
+      <input type="text" id="saturday-input" placeholder="Add task…" onkeydown="if(event.key==='Enter')addTask('saturday')">
+      <select id="saturday-module">
+        <option value="">Module</option>
+          <option>BOIL</option>
+          <option>CrimJust</option>
+          <option>CrimLaw</option>
+          <option>FinAcc</option>
+          <option>CivProc</option>
+          <option>Contracts</option>
+          <option>CrimProc</option>
+          <option>Evidence</option>
+          <option>ManAcc</option>
+          <option>PIL</option>
+          <option>Tutoring</option>
+          <option>Admin</option>
+      </select>
+    </div>
+    <button class="btn-add" style="background:#f0965a;color:#0d0f12" onclick="addTask('saturday')">+ Add</button>
+  </div>
+  <div class="task-list" id="list-saturday"></div>
+</div>
+
+<!-- SUNDAY -->
+<div class="list-card" id="drop-sunday" ondragover="onDragOver(event,'sunday')" ondrop="onDrop(event,'sunday')" ondragleave="onDragLeave(event)">
+  <div class="list-card-header">
+    <span class="list-card-title" style="color:var(--accent-red)">
+      <span style="font-size:14px"> </span> Sunday
+      <span class="list-badge" id="badge-sunday">0</span>
+    </span>
+  </div>
+  <div class="add-task-form">
+    <div class="add-task-row">
+      <input type="text" id="sunday-input" placeholder="Add task…" onkeydown="if(event.key==='Enter')addTask('sunday')">
+      <select id="sunday-module">
+        <option value="">Module</option>
+          <option>BOIL</option>
+          <option>CrimJust</option>
+          <option>CrimLaw</option>
+          <option>FinAcc</option>
+          <option>CivProc</option>
+          <option>Contracts</option>
+          <option>CrimProc</option>
+          <option>Evidence</option>
+          <option>ManAcc</option>
+          <option>PIL</option>
+          <option>Tutoring</option>
+          <option>Admin</option>
+      </select>
+    </div>
+    <button class="btn-add" style="background:var(--accent-red)" onclick="addTask('sunday')">+ Add</button>
+  </div>
+  <div class="task-list" id="list-sunday"></div>
+</div>
+
+    </div>
+  </div>
+
+  <!-- ====== DEADLINES VIEW ====== -->
+  <div class="view" id="view-deadlines">
+    <div class="section-header">
+      <span class="section-title">Upcoming Deadlines</span>
+    </div>
+    <div class="deadline-panel">
+      <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);letter-spacing:1px;margin-bottom:10px">ADD NEW DEADLINE</div>
+      <div class="add-deadline-row">
+        <input type="text" id="dl-name" placeholder="Add Deadline...">
+        <input type="datetime-local" id="dl-datetime">
+        <button class="btn-add" onclick="addDeadline()">+ Add Deadline</button>
+      </div>
+      <div class="deadline-grid" id="deadline-list"></div>
+    </div>
+  </div>
+
+  <!-- ====== CALENDAR VIEW ====== -->
+  <div class="view" id="view-calendar">
+    <div class="cv-toolbar">
+      <div class="cv-nav">
+        <button class="cv-btn" onclick="calStep(-1)" title="Previous">‹</button>
+        <button class="cv-btn" onclick="calToday()">Today</button>
+        <button class="cv-btn" onclick="calStep(1)" title="Next">›</button>
+      </div>
+      <div class="cv-title" id="cv-title"></div>
+      <div class="cv-seg" id="cv-seg">
+        <button data-v="day" onclick="calSetView('day')">Day</button>
+        <button data-v="week" onclick="calSetView('week')">Week</button>
+        <button data-v="month" onclick="calSetView('month')">Month</button>
+      </div>
+      <button class="btn-add" onclick="openEventModal()">+ Event</button>
+    </div>
+    <div id="cv-body"></div>
+    <div class="cv-legend">
+      <span><i class="cv-sw" style="background:var(--accent-blue)"></i>My events</span>
+      <span><i class="cv-sw" style="background:var(--accent-red)"></i>Deadlines</span>
+      <span><i class="cv-sw" style="background:var(--tt-color)"></i>Timetable</span>
+      <span id="cv-tt-status" class="cv-tt-status"></span>
+    </div>
+  </div>
+
+  <!-- ====== NOTES VIEW ====== -->
+  <div class="view" id="view-notes">
+    <div class="section-header">
+      <span class="section-title purple">Notes</span>
+      <span class="notes-status" id="notes-status">Auto-saved</span>
+    </div>
+    <textarea class="notes-area" id="notes-area" placeholder="Write your notes here…"></textarea>
+  </div>
+  
+    <!-- ====== ITALY 2028 VIEW ====== -->
+  <div class="view" id="view-italy">
+    <div class="section-header">
+      <span class="section-title orange">Italy 2028</span>
+    </div>
+
+    <div class="it-wrap">
+
+      <!-- LEFT: Dictionary -->
+      <div class="it-panel it-dict">
+        <div class="it-panel-title">Dictionary</div>
+        <input class="it-search" id="it-search" type="search" placeholder="Search English or Italian…">
+
+        <div class="it-split">
+          <div class="it-section">
+            <div class="it-section-title">Words <span class="it-count" id="it-word-count">0</span></div>
+            <div class="it-add">
+              <input id="it-word-en" placeholder="English">
+              <input id="it-word-it" placeholder="Italiano">
+              <button class="btn-add" id="it-word-add">+ Add</button>
+            </div>
+            <div class="it-list" id="it-word-list"></div>
+          </div>
+
+          <div class="it-section">
+            <div class="it-section-title">Common phrases <span class="it-count" id="it-phrase-count">0</span></div>
+            <div class="it-add">
+              <input id="it-phrase-en" placeholder="English">
+              <input id="it-phrase-it" placeholder="Italiano">
+              <button class="btn-add" id="it-phrase-add">+ Add</button>
+            </div>
+            <div class="it-list" id="it-phrase-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT TOP: Flashcards -->
+      <div class="it-panel">
+        <div class="it-panel-title">Flashcards</div>
+        <div class="it-flash-controls">
+          <select id="it-flash-source">
+            <option value="both">Words + phrases</option>
+            <option value="words">Words only</option>
+            <option value="phrases">Phrases only</option>
+          </select>
+          <select id="it-flash-dir">
+            <option value="en-it">English → Italian</option>
+            <option value="it-en">Italian → English</option>
+          </select>
+          <button class="small-btn" id="it-flash-next">Next card</button>
+        </div>
+        <div class="it-card" id="it-card">
+          <div class="it-front" id="it-front">Add some words to start</div>
+          <div class="it-back" id="it-back"></div>
+          <div class="it-hint" id="it-hint"></div>
+        </div>
+        <div class="it-flash-foot">
+          <span id="it-flash-count"></span>
+          <span>Say it out loud before you flip</span>
+        </div>
+      </div>
+
+      <!-- RIGHT BOTTOM: Notes (left) + Savings tracker (right) -->
+      <div class="it-split-row">
+
+<div class="it-panel">
+  <div class="it-panel-title">Notes &amp; places to go</div>
+  <textarea class="it-notes" id="it-notes" placeholder="Travel ideas, places, grammar quirks, anything…"></textarea>
+</div>
+
+<div class="it-panel" id="it-b-panel">
+  <div class="it-panel-title" style="display:flex;justify-content:space-between;align-items:center">
+    Savings tracker
+    <button class="small-btn" id="it-b-eye">Hide amounts</button>
+  </div>
+
+          <div class="it-b-goalrow">
+            <label for="it-b-goal-input">GOAL (R)</label>
+            <input type="number" id="it-b-goal-input" min="0" step="any">
+            <button class="small-btn" id="it-b-goal-set">Set</button>
+          </div>
+
+          <div class="it-b-stats">
+            <span class="it-b-saved blurable" id="it-b-saved">R 0</span>
+            <span class="it-b-pct" id="it-b-pct">0% saved</span>
+          </div>
+          <div class="it-b-track"><div class="it-b-fill" id="it-b-fill"></div></div>
+          <div class="it-b-meta blurable" id="it-b-left"></div>
+
+          <div class="it-add">
+            <input type="number" id="it-b-amt" placeholder="Amount (R)" step="any">
+            <input id="it-b-note" placeholder="Note (optional)">
+            <button class="btn-add" id="it-b-add">+ Add</button>
+          </div>
+          <div class="it-list" id="it-b-list"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     MOVE TASK MODAL
+     ============================================================ -->
+<div class="modal-overlay" id="move-modal">
+  <div class="modal-box">
+    <div class="modal-title">MOVE TASK TO</div>
+    <div class="modal-options" id="move-options"></div>
+    <button class="modal-cancel" onclick="closeModal('move-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     EVENT MODAL (add / edit)
+     ============================================================ -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal-box cv-modal">
+    <div class="modal-title" id="event-modal-title">NEW EVENT</div>
+    <div class="event-form">
+      <div>
+        <label for="event-title">Title</label>
+        <input type="text" id="event-title" placeholder="e.g. Study group, Exam…">
+      </div>
+      <div>
+        <label for="event-location">Location</label>
+        <input type="text" id="event-location" placeholder="e.g. Library, room 2B">
+      </div>
+      <label class="cv-check"><input type="checkbox" id="event-allday" onchange="evAllDayChanged()"> All-day</label>
+      <div class="cv-dt-row">
+        <label>Starts</label>
+        <div class="cv-dt">
+          <input type="date" id="event-start-date" onchange="evStartChanged()">
+          <input type="time" id="event-start-time" onchange="evStartChanged()">
+        </div>
+      </div>
+      <div class="cv-dt-row">
+        <label>Ends</label>
+        <div class="cv-dt">
+          <input type="date" id="event-end-date">
+          <input type="time" id="event-end-time">
+        </div>
+      </div>
+      <div>
+        <label for="event-module">Module / colour</label>
+        <select id="event-module" style="width:100%">
+          <option value="">None</option>
+          <option>BOIL</option>
+          <option>CrimJust</option>
+          <option>CrimLaw</option>
+          <option>FinAcc</option>
+          <option>CivProc</option>
+          <option>Contracts</option>
+          <option>CrimProc</option>
+          <option>Evidence</option>
+          <option>ManAcc</option>
+          <option>PIL</option>
+          <option>Tutoring</option>
+          <option>Admin</option>
+        </select>
+      </div>
+      <div>
+        <label for="event-notes">Notes</label>
+        <textarea id="event-notes" rows="3" style="width:100%;resize:vertical" placeholder="Anything to remember…"></textarea>
+      </div>
+      <div class="cv-form-error" id="event-error"></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn-primary" onclick="saveEvent()" style="flex:1">Save</button>
+        <button class="cv-btn-danger" id="event-delete-btn" onclick="deleteEvent()">Delete</button>
+        <button class="modal-cancel" onclick="closeModal('event-modal')" style="flex:0 0 auto;margin:0;padding:9px 16px">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DETAIL MODAL (timetable classes and deadlines: read-only)
+     ============================================================ -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal-box cv-modal">
+    <div class="modal-title" id="detail-kind"></div>
+    <div class="cv-detail-title" id="detail-title"></div>
+    <div class="cv-detail-row" id="detail-when"></div>
+    <div class="cv-detail-row" id="detail-where"></div>
+    <div class="cv-detail-notes" id="detail-notes"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn-primary" id="detail-action" style="flex:1"></button>
+      <button class="modal-cancel" onclick="closeModal('detail-modal')" style="flex:0 0 auto;margin:0;padding:9px 16px">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SETTINGS MODAL
+     ============================================================ -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal-box cv-modal cv-settings">
+    <div class="modal-title">SETTINGS</div>
+
+    <div class="cv-set-section">
+      <div class="cv-set-head">Account &amp; sync</div>
+      <div class="cv-set-text" id="set-account-text">Checking…</div>
+      <button class="small-btn" id="set-signout-btn" onclick="window.appSignOut && window.appSignOut()" style="display:none">Sign out</button>
+    </div>
+
+    <div class="cv-set-section">
+      <div class="cv-set-head">University timetable</div>
+      <div class="cv-set-text">Paste the timetable subscription link (it usually ends in <code>.ics</code> or starts with <code>webcal://</code>). Leave it empty if you don't have it yet. Your classes show on the calendar and can't be edited here.</div>
+      <label class="cv-set-label" for="set-ics-url">Timetable link</label>
+      <input type="url" id="set-ics-url" placeholder="Leave blank until you have it" autocomplete="off" spellcheck="false">
+      <label class="cv-set-label" for="set-proxy-url">Timetable helper link (from the setup guide)</label>
+      <input type="url" id="set-proxy-url" placeholder="https://….workers.dev" autocomplete="off" spellcheck="false">
+      <label class="cv-check" style="margin-top:8px"><input type="checkbox" id="set-tt-show"> Show timetable on calendar</label>
+      <div class="cv-set-status" id="set-tt-status"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn-primary" onclick="saveTimetableSettings()" style="flex:1">Save &amp; refresh timetable</button>
+      </div>
+    </div>
+
+    <button class="modal-cancel" onclick="closeModal('settings-modal')">Close</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     SIGN-IN SCREEN (only shown once sync is set up)
+     ============================================================ -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="bar-logo" style="font-size:18px;text-align:center">Task Manager</div>
+    <div class="auth-sub" id="auth-sub">Sign in to sync your laptop and phone</div>
+    <input type="email" id="auth-email" placeholder="Email" autocomplete="username">
+    <input type="password" id="auth-password" placeholder="Password (at least 6 characters)" autocomplete="current-password">
+    <div class="cv-form-error" id="auth-error"></div>
+    <button class="btn-primary" id="auth-signin">Sign in</button>
+    <button class="small-btn" id="auth-signup">Create my account (first time only)</button>
+    <button class="auth-link" id="auth-reset">Forgot password?</button>
+  </div>
+</div>
+
+<script src="calendar.js"></script>
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let tasks = {};        // { id: { name, module, status, list } }
+let deadlines = {};    // { id: { name, datetime } }
+let calEvents = {};    // { id: { title, date, time } }
+let notes = '';
+let dragTaskId = null;
+let dragFromList = null;
+let moveTaskId = null;
+let addEventForDate = null;
+let currentView = 'tasks';
+let theme = 'dark';
+
+const LISTS = ['master','monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+const STATUS_CYCLE = ['none','progress','done','failed'];
+const STATUS_ICONS = { none:'', progress:'–', done:'✓', failed:'✗' };
+
+/* ============================================================
+   LOCAL STORAGE
+   ============================================================ */
+function save() {
+  localStorage.setItem('ed_tasks', JSON.stringify(tasks));
+  localStorage.setItem('ed_deadlines', JSON.stringify(deadlines));
+  localStorage.setItem('ed_events', JSON.stringify(calEvents));
+  localStorage.setItem('ed_notes', notes);
+  localStorage.setItem('ed_theme', theme);
+}
+
+function load() {
+  tasks = JSON.parse(localStorage.getItem('ed_tasks') || '{}');
+  deadlines = JSON.parse(localStorage.getItem('ed_deadlines') || '{}');
+  calEvents = JSON.parse(localStorage.getItem('ed_events') || '{}');
+  notes = localStorage.getItem('ed_notes') || '';
+  theme = localStorage.getItem('ed_theme') || 'dark';
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init() {
+  load();
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-toggle').textContent = theme === 'dark' ? '🌙' : '☀️';
+  document.getElementById('notes-area').value = notes;
+  renderAllLists();
+  renderDeadlines();
+  renderCalendar();
+  updateTopBar();
+  startClock();
+  // Notes autosave
+  document.getElementById('notes-area').addEventListener('input', function() {
+    notes = this.value;
+    save();
+    const s = document.getElementById('notes-status');
+    s.textContent = 'Saved ✓';
+    setTimeout(() => s.textContent = 'Auto-saved', 1500);
+  });
+}
+
+/* ============================================================
+   CLOCK & DATE
+   ============================================================ */
+function startClock() {
+  updateClock();
+  setInterval(updateClock, 1000);
+  setInterval(updateTopBar, 30000);
+}
+function updateClock() {
+  const now = new Date();
+  document.getElementById('bar-date').textContent = now.toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('bar-time').textContent = now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* ============================================================
+   TOP BAR UPDATE
+   ============================================================ */
+function updateTopBar() {
+  renderBarDeadlines();
+}
+
+function updateHomeCountdown() {
+  const target = new Date('2026-11-26T12:00:00');
+  const now = new Date();
+  const diff = target - now;
+  const el = document.getElementById('bar-home-countdown');
+  if (!el) return;
+  if (diff <= 0) { el.textContent = '🏠 You\'re home!'; return; }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  el.textContent = `${d}d ${h}h ${m}m ${s}s`;
+}
+setInterval(updateHomeCountdown, 1000);
+updateHomeCountdown();
+
+function renderBarDeadlines() {
+  const container = document.getElementById('bar-deadlines');
+  const now = Date.now();
+  const sorted = Object.entries(deadlines)
+    .map(([id,d]) => ({id, ...d, ms: new Date(d.datetime).getTime()}))
+    .filter(d => d.ms > now)
+    .sort((a,b) => a.ms - b.ms)
+    .slice(0,5);
+
+  if (!sorted.length) {
+    container.innerHTML = '<span style="font-size:11px;color:var(--text-muted)">No upcoming deadlines</span>';
+    return;
+  }
+  container.innerHTML = sorted.map(d => {
+    const diff = d.ms - now;
+    const urgency = diff < 86400000 ? 'urgent' : diff < 3*86400000 ? 'soon' : 'ok';
+    return `<div class="deadline-chip ${urgency}" onclick="switchView('deadlines')">
+      <span class="deadline-dot ${urgency}"></span>
+      <span>${d.name}</span>
+      <span class="chip-countdown">${fmtCountdown(diff)}</span>
+    </div>`;
+  }).join('');
+}
+
+function fmtCountdown(ms) {
+  if (ms <= 0) return 'PAST';
+  const d = Math.floor(ms/86400000);
+  const h = Math.floor((ms%86400000)/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+/* ============================================================
+   TASK MANAGEMENT
+   ============================================================ */
+function uid() { return '_' + Math.random().toString(36).slice(2,9); }
+
+function addTask(list) {
+  const input = document.getElementById(list + '-input');
+  const select = document.getElementById(list + '-module');
+  const name = input.value.trim();
+  if (!name) { input.focus(); return; }
+  const id = uid();
+  tasks[id] = { name, module: select.value, status: 'none', list };
+  input.value = '';
+  save();
+  renderList(list);
+  updateTopBar();
+}
+
+function deleteTask(id) {
+  const list = tasks[id].list;
+  delete tasks[id];
+  save();
+  renderList(list);
+  updateTopBar();
+}
+
+function cycleStatus(id) {
+  const t = tasks[id];
+  const idx = STATUS_CYCLE.indexOf(t.status);
+  t.status = STATUS_CYCLE[(idx+1) % STATUS_CYCLE.length];
+  save();
+  renderList(t.list);
+  updateTopBar();
+}
+
+function openMoveModal(id) {
+  moveTaskId = id;
+  const from = tasks[id].list;
+  const opts = [
+	{val:'master',    label:'Master List'},
+	{val:'monday',    label:'Monday'},
+	{val:'tuesday',   label:'Tuesday'},
+	{val:'wednesday', label:'Wednesday'},
+	{val:'thursday',  label:'Thursday'},
+	{val:'friday',    label:'Friday'},
+	{val:'saturday',  label:'Saturday'},
+	{val:'sunday',    label:'Sunday'},
+  ].filter(o => o.val !== from);
+  document.getElementById('move-options').innerHTML = opts.map(o =>
+    `<button class="modal-opt-btn" onclick="moveTask('${o.val}')">${o.label}</button>`
+  ).join('');
+  document.getElementById('move-modal').classList.add('open');
+}
+
+function moveTask(toList) {
+  if (!moveTaskId) return;
+  const from = tasks[moveTaskId].list;
+  tasks[moveTaskId].list = toList;
+  save();
+  renderList(from);
+  renderList(toList);
+  updateTopBar();
+  closeModal('move-modal');
+  moveTaskId = null;
+}
+
+/* ============================================================
+   RENDER LISTS
+   ============================================================ */
+function renderAllLists() { LISTS.forEach(l => renderList(l)); }
+
+function renderList(list) {
+  const container = document.getElementById('list-' + list);
+  const badge = document.getElementById('badge-' + list);
+  const listTasks = Object.entries(tasks).filter(([,t]) => t.list === list);
+  badge.textContent = listTasks.length;
+  if (!listTasks.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">○</div>No tasks yet</div>`;
+    return;
+  }
+  container.innerHTML = listTasks.map(([id,t]) => renderTaskItem(id,t)).join('');
+  // Drag listeners
+  container.querySelectorAll('.task-item').forEach(el => {
+    el.addEventListener('dragstart', e => onDragStart(e, el.dataset.id, list));
+    el.addEventListener('dragend', e => onDragEnd(e, el));
+  });
+}
+
+function renderTaskItem(id, t) {
+  const icon = STATUS_ICONS[t.status];
+  const subTag = t.module ? `<span class="module-tag" data-module="${t.module}">${t.module.length > 12 ? t.module.slice(0,12)+'…' : t.module}</span>` : '';
+  return `<div class="task-item${t.status==='done'?' completed':''}" draggable="true" data-id="${id}">
+    <button class="status-btn" data-status="${t.status}" onclick="cycleStatus('${id}')" title="Click to change status">${icon}</button>
+    <span class="task-name">${escHtml(t.name)}</span>
+    ${subTag}
+    <div class="task-actions">
+      <button class="task-btn move" onclick="openMoveModal('${id}')" title="Move to list">↗</button>
+      <button class="task-btn delete" onclick="deleteTask('${id}')" title="Delete">✕</button>
+    </div>
+  </div>`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ============================================================
+   DRAG AND DROP
+   ============================================================ */
+function onDragStart(e, id, fromList) {
+  dragTaskId = id;
+  dragFromList = fromList;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => document.querySelector(`[data-id="${id}"]`)?.classList.add('dragging'), 0);
+}
+function onDragEnd(e, el) { el.classList.remove('dragging'); }
+
+function onDragOver(e, list) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.getElementById('drop-' + list)?.classList.add('drag-over');
+}
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function onDrop(e, toList) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!dragTaskId || toList === dragFromList) return;
+  const from = dragFromList;
+  tasks[dragTaskId].list = toList;
+  save();
+  renderList(from);
+  renderList(toList);
+  updateTopBar();
+  dragTaskId = null;
+  dragFromList = null;
+}
+
+/* ============================================================
+   DEADLINES
+   ============================================================ */
+function addDeadline() {
+  const name = document.getElementById('dl-name').value.trim();
+  const dt = document.getElementById('dl-datetime').value;
+  if (!name || !dt) return;
+  const id = uid();
+  deadlines[id] = { name, datetime: dt };
+  document.getElementById('dl-name').value = '';
+  document.getElementById('dl-datetime').value = '';
+  save();
+  renderDeadlines();
+  renderCalendar();
+  updateTopBar();
+}
+
+function deleteDeadline(id) {
+  delete deadlines[id];
+  save();
+  renderDeadlines();
+  renderCalendar();
+  updateTopBar();
+}
+
+function renderDeadlines() {
+  const container = document.getElementById('deadline-list');
+  const now = Date.now();
+  const sorted = Object.entries(deadlines)
+    .map(([id,d]) => ({id, ...d, ms: new Date(d.datetime).getTime()}))
+    .sort((a,b) => a.ms - b.ms);
+  if (!sorted.length) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon"> </div>No deadlines added yet</div>';
+    return;
+  }
+  container.innerHTML = sorted.map(d => {
+    const diff = d.ms - now;
+    const urgency = diff < 0 ? 'failed' : diff < 86400000 ? 'urgent' : diff < 3*86400000 ? 'soon' : 'ok';
+    const cls = diff < 0 ? 'failed' : urgency;
+    const dtStr = new Date(d.datetime).toLocaleString('en-ZA',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    return `<div class="deadline-item ${urgency === 'failed' ? 'urgent' : urgency}">
+      <div class="deadline-info">
+        <div class="deadline-name">${escHtml(d.name)}</div>
+        <div class="deadline-time">${dtStr}</div>
+        <div class="deadline-countdown ${cls}">${diff < 0 ? 'PAST DUE' : fmtCountdown(diff) + ' remaining'}</div>
+      </div>
+      <button class="btn-del-deadline" onclick="deleteDeadline('${d.id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// Live countdown in deadline view
+setInterval(() => { if(currentView === 'deadlines') renderDeadlines(); renderBarDeadlines(); }, 60000);
+
+/* ============================================================
+   CALENDAR
+   Lives in calendar.js (month / week / day views, events,
+   deadlines and the timetable subscription).
+   ============================================================ */
+
+/* ============================================================
+   SYNC: reload everything after another device changed data
+   ============================================================ */
+function reloadFromStorage() {
+  load();
+  const na = document.getElementById('notes-area');
+  if (document.activeElement !== na) na.value = notes;
+  renderAllLists();
+  renderDeadlines();
+  renderCalendar();
+  updateTopBar();
+  if (window.itReload) window.itReload();
+}
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('[id^="nav-"]').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('nav-' + view + '-btn') || document.getElementById('nav-' + view[0] + '-btn');
+  // Map view names to button IDs
+const btnMap = { tasks:'nav-tasks-btn', deadlines:'nav-deadlines-btn', calendar:'nav-cal-btn', notes:'nav-notes-btn', italy:'nav-italy-btn' };
+  if (btnMap[view]) document.getElementById(btnMap[view]).classList.add('active');
+  if (view === 'deadlines') renderDeadlines();
+  if (view === 'calendar') renderCalendar();
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', function(e) {
+    if (e.target === this) closeModal(this.id);
+  });
+});
+// ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+  }
+});
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-toggle').textContent = theme === 'dark' ? '🌙' : '☀️';
+  save();
+}
+
+/* ============================================================
+   START
+   ============================================================ */
+/* ============================================================
+   ITALY 2028
+   ============================================================ */
+(function () {
+  const KEY = { words:'ed_italy_words', phrases:'ed_italy_phrases', notes:'ed_italy_notes' };
+  const $it = id => document.getElementById(id);
+
+  const itLoad = (k, fallback) => {
+    try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+    catch (e) { return fallback; }
+  };
+  const itSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+
+  let words   = itLoad(KEY.words, []);    // [{en, it}]
+  let phrases = itLoad(KEY.phrases, []);  // [{en, it}]
+
+  /* ---------- Dictionary ---------- */
+  function renderList(listEl, items, type) {
+    const q = $it('it-search').value.trim().toLowerCase();
+    listEl.innerHTML = '';
+    const shown = items
+      .map((item, i) => ({ item, i }))
+      .filter(({ item }) => !q || item.en.toLowerCase().includes(q) || item.it.toLowerCase().includes(q))
+      .sort((a, b) => a.item.en.localeCompare(b.item.en));
+
+	const countEl = $it(type === 'words' ? 'it-word-count' : 'it-phrase-count');
+	countEl.textContent = q ? shown.length + ' of ' + items.length : items.length;
+
+    if (!shown.length) {
+      const d = document.createElement('div');
+      d.className = 'it-empty';
+      d.textContent = q ? 'No matches' : 'Nothing yet';
+      listEl.appendChild(d);
+      return;
+    }
+    shown.forEach(({ item, i }) => {
+      const row = document.createElement('div'); row.className = 'it-row';
+      const it = document.createElement('span'); it.className = 'it-row-it'; it.textContent = item.it;
+      const en = document.createElement('span'); en.className = 'it-row-en'; en.textContent = item.en;
+      const del = document.createElement('button'); del.className = 'it-del'; del.textContent = '\u2715';
+      del.title = 'Delete';
+      del.onclick = () => {
+        const arr = type === 'words' ? words : phrases;
+        arr.splice(i, 1);
+        itSave(KEY[type], arr);
+        renderAll();
+      };
+      row.append(it, en, del);
+      listEl.appendChild(row);
+    });
+  }
+
+  function renderAll() {
+    renderList($it('it-word-list'), words, 'words');
+    renderList($it('it-phrase-list'), phrases, 'phrases');
+    updateCount();
+  }
+
+  function addEntry(type, enId, itId) {
+  const en = $it(enId).value.trim(), it = $it(itId).value.trim();
+  if (!en || !it) return;
+  const arr = type === 'words' ? words : phrases;
+  const norm = s => s.trim().toLowerCase().replace(/\s+/g, ' ');
+  const dup = arr.some(x => norm(x.en) === norm(en) && norm(x.it) === norm(it));
+  if (dup) {
+    $it(type === 'words' ? 'it-word-count' : 'it-phrase-count').textContent = 'already added';
+    setTimeout(renderAll, 1500);
+    $it(enId).select();
+    return;
+  }
+  arr.push({ en, it });
+  itSave(KEY[type], arr);
+  $it(enId).value = ''; $it(itId).value = '';
+  $it(enId).focus();
+  renderAll();
+}
+
+  $it('it-word-add').onclick   = () => addEntry('words', 'it-word-en', 'it-word-it');
+  $it('it-phrase-add').onclick = () => addEntry('phrases', 'it-phrase-en', 'it-phrase-it');
+  ['it-word-en', 'it-word-it'].forEach(id =>
+    $it(id).addEventListener('keydown', e => { if (e.key === 'Enter') addEntry('words', 'it-word-en', 'it-word-it'); }));
+  ['it-phrase-en', 'it-phrase-it'].forEach(id =>
+    $it(id).addEventListener('keydown', e => { if (e.key === 'Enter') addEntry('phrases', 'it-phrase-en', 'it-phrase-it'); }));
+  $it('it-search').addEventListener('input', renderAll);
+
+  /* ---------- Flashcards ---------- */
+  let current = null, flipped = false;
+
+  function pool() {
+    const s = $it('it-flash-source').value;
+    if (s === 'words') return words;
+    if (s === 'phrases') return phrases;
+    return words.concat(phrases);
+  }
+  function updateCount() { $it('it-flash-count').textContent = pool().length + ' cards in deck'; }
+
+  function nextCard() {
+    const p = pool();
+    flipped = false;
+    if (!p.length) {
+      current = null;
+      $it('it-front').textContent = 'Add some words to start';
+      $it('it-back').textContent = '';
+      $it('it-hint').textContent = '';
+      return;
+    }
+    let pick;
+    do { pick = p[Math.floor(Math.random() * p.length)]; } while (p.length > 1 && pick === current);
+    current = pick;
+    const enFirst = $it('it-flash-dir').value === 'en-it';
+    $it('it-front').textContent = enFirst ? current.en : current.it;
+    $it('it-back').textContent = '';
+    $it('it-hint').textContent = 'Click the card to reveal';
+  }
+
+  function flip() {
+    if (!current) return;
+    const enFirst = $it('it-flash-dir').value === 'en-it';
+    if (!flipped) {
+      $it('it-back').textContent = enFirst ? current.it : current.en;
+      $it('it-hint').textContent = 'Click again for next card';
+      flipped = true;
+    } else {
+      nextCard();
+    }
+  }
+
+  $it('it-card').onclick = flip;
+  $it('it-flash-next').onclick = nextCard;
+  $it('it-flash-source').onchange = () => { updateCount(); nextCard(); };
+  $it('it-flash-dir').onchange = nextCard;
+
+  /* ---------- Notes (autosave) ---------- */
+  $it('it-notes').value = itLoad(KEY.notes, '');
+  $it('it-notes').addEventListener('input', e => itSave(KEY.notes, e.target.value));
+
+  /* ---------- Savings tracker ---------- */
+  const BKEY = 'ed_italy_budget';
+  let budget = itLoad(BKEY, { goal: 50000, entries: [] });  // entries: [{amt, note, date}]
+  const rand = n => 'R ' + Number(n).toLocaleString('en-ZA', { maximumFractionDigits: 2 });
+
+  function renderBudget() {
+    const saved = budget.entries.reduce((s, e) => s + e.amt, 0);
+    const goal = budget.goal;
+    const pct = goal > 0 ? (saved / goal) * 100 : 0;
+
+    $it('it-b-saved').textContent = rand(saved);
+    $it('it-b-pct').textContent = (+pct.toFixed(1)) + '% saved';
+    $it('it-b-fill').style.width = Math.max(0, Math.min(100, pct)) + '%';
+    $it('it-b-left').textContent = saved >= goal
+      ? 'Goal reached \uD83C\uDF89'
+      : 'Still to go: ' + rand(goal - saved) + '  (goal ' + rand(goal) + ')';
+
+    const list = $it('it-b-list');
+    list.innerHTML = '';
+    if (!budget.entries.length) {
+      const d = document.createElement('div');
+      d.className = 'it-empty';
+      d.textContent = 'Add what you have now to get started';
+      list.appendChild(d);
+      return;
+    }
+    // newest first, keep original index for deleting
+    budget.entries.map((e, i) => ({ e, i })).reverse().forEach(({ e, i }) => {
+      const row = document.createElement('div'); row.className = 'it-row';
+      const date = document.createElement('span'); date.className = 'it-b-entry-date'; date.textContent = e.date;
+      const note = document.createElement('span'); note.className = 'it-row-en'; note.textContent = e.note || '';
+      const amt = document.createElement('span');
+	  amt.className = 'it-b-entry-amt blurable' + (e.amt < 0 ? ' neg' : '');
+      amt.textContent = (e.amt > 0 ? '+' : '') + rand(e.amt);
+      const del = document.createElement('button'); del.className = 'it-del'; del.textContent = '\u2715';
+      del.title = 'Delete';
+      del.onclick = () => { budget.entries.splice(i, 1); itSave(BKEY, budget); renderBudget(); };
+      row.append(date, note, amt, del);
+      list.appendChild(row);
+    });
+  }
+
+  function addMoney() {
+    const amt = parseFloat($it('it-b-amt').value.replace(',', '.'));
+    if (!amt) { $it('it-b-amt').focus(); return; }
+    const date = new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' });
+    budget.entries.push({ amt, note: $it('it-b-note').value.trim(), date });
+    itSave(BKEY, budget);
+    $it('it-b-amt').value = ''; $it('it-b-note').value = '';
+    $it('it-b-amt').focus();
+    renderBudget();
+  }
+
+  function setGoal() {
+    const g = parseFloat($it('it-b-goal-input').value);
+    if (!(g > 0)) { $it('it-b-goal-input').value = budget.goal; return; }
+    budget.goal = g;
+    itSave(BKEY, budget);
+    renderBudget();
+  }
+
+  $it('it-b-goal-input').value = budget.goal;
+  $it('it-b-goal-set').onclick = setGoal;
+  $it('it-b-goal-input').addEventListener('keydown', e => { if (e.key === 'Enter') setGoal(); });
+  $it('it-b-add').onclick = addMoney;
+  ['it-b-amt', 'it-b-note'].forEach(id =>
+    $it(id).addEventListener('keydown', e => { if (e.key === 'Enter') addMoney(); }));
+  
+  const HKEY = 'ed_italy_budget_hidden';
+let hidden = false;
+try { hidden = localStorage.getItem(HKEY) === '1'; } catch (e) {}
+function applyHide() {
+  $it('it-b-panel').classList.toggle('it-b-hide', hidden);
+  $it('it-b-eye').textContent = hidden ? 'Show amounts' : 'Hide amounts';
+}
+$it('it-b-eye').onclick = () => {
+  hidden = !hidden;
+  try { localStorage.setItem(HKEY, hidden ? '1' : '0'); } catch (e) {}
+  applyHide();
+};
+applyHide();
+
+  /* ---------- Reload after sync from another device ---------- */
+  window.itReload = function () {
+    words   = itLoad(KEY.words, []);
+    phrases = itLoad(KEY.phrases, []);
+    budget  = itLoad(BKEY, { goal: 50000, entries: [] });
+    $it('it-b-goal-input').value = budget.goal;
+    if (document.activeElement !== $it('it-notes')) $it('it-notes').value = itLoad(KEY.notes, '');
+    renderBudget();
+    renderAll();
+  };
+
+  renderBudget();
+  renderAll();
+  nextCard();
+})();
+init();
+</script>
+<script type="module" src="sync.js"></script>
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
