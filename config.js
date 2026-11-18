@@ -1,14 +1,14 @@
 /* ============================================================
    FIREBASE SETTINGS (for syncing your phone and laptop)
-   Fill these in by following Part 2 of the setup guide.
-   While they're empty, the app still works, but everything is
-   saved on that one device only.
+   These identify your Firebase project "dashboard-2248".
+   They are safe to be public; your data is protected by your
+   password and the Firestore rules.
    ============================================================ */
 window.FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyB2k_mI5yavtQF1647lsSbrfZMCxEvJOjE",
+  authDomain: "dashboard-2248.firebaseapp.com",
+  projectId: "dashboard-2248",
+  storageBucket: "dashboard-2248.firebasestorage.app",
+  messagingSenderId: "461937153772",
+  appId: "1:461937153772:web:0602383b6fac28aa9a37c9"
 };
