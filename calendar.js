@@ -16,8 +16,9 @@ const CV_MODULE_COLORS = Object.fromEntries(
 const CV_DAYNAMES = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
 let cvView = (function () {
-  try { const v = localStorage.getItem('ed_cal_view'); if (v) return v; } catch (e) {}
-  return window.innerWidth < 560 ? 'day' : 'week';
+  // only Day and Month views now (Week was removed)
+  try { const v = localStorage.getItem('ed_cal_view'); if (v === 'day' || v === 'month') return v; } catch (e) {}
+  return window.innerWidth < 560 ? 'day' : 'month';
 })();
 let cvCursor = cvStartOfDay(new Date());
 let cvItems = [];          // items currently on screen, looked up by index on click
@@ -61,7 +62,7 @@ function cvNormalizeEvent(e) {
   return Object.assign({}, e, { start, end: e.date + 'T' + cvHM(new Date(s.getTime() + 3600e3)), allDay: !e.time });
 }
 
-function cvCollect(from, to) {
+function cvCollect(from, to, includeTT = true) {
   const out = [];
   const f = from.getTime(), t = to.getTime();
   const overlaps = (s, e) => s < t && (e > f || (e === s && s >= f));
@@ -86,7 +87,7 @@ function cvCollect(from, to) {
   });
 
   // University timetable
-  if (cvGetSettings().showTT !== false) {
+  if (includeTT && cvGetSettings().showTT !== false) {
     cvTimetableOccurrences(f, t).forEach(o => out.push(o));
   }
   return out.sort((a, b) => a.s - b.s || (b.e - b.s) - (a.e - a.s));
@@ -134,7 +135,7 @@ function cvRenderMonth(body) {
   const start = cvStartOfWeek(first);
   const end = cvAddDays(start, 42);
   document.getElementById('cv-title').textContent = cvFmtDate(first, { month:'long', year:'numeric' });
-  const items = cvCollect(start, end);
+  const items = cvCollect(start, end, false); // month view: no timetable classes, just my events and deadlines
   const today = cvStartOfDay(new Date());
   const maxShow = window.innerWidth < 560 ? 3 : 4;
   cvItems = [];

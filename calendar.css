@@ -396,3 +396,5 @@ body{font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif}
 .list-badge,.it-count{border-radius:10px !important}
 /* "Task Manager" in the same green as the buttons and headings */
 .bar-logo{color:var(--btn-green) !important}
+/* Today's date circle in green (month and day views) */
+.cv-mcell.today .cv-mnum,.cv-dh.today .dd{background:var(--btn-green);color:var(--btn-green-text)}
