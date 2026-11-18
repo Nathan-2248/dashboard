@@ -9,11 +9,10 @@
 const CV_HOUR_H = 48;              // pixel height of one hour (matches --hour-h)
 const CV_TT_CACHE = 'ed_tt_cache'; // timetable copy kept on each device
 const CV_TT_MAX_AGE = 2 * 3600e3;  // refresh the timetable every 2 hours
-const CV_MODULE_COLORS = {
-  BOIL:'#4f8ef7', CrimJust:'#9b7df7', CrimLaw:'#e05c5c', FinAcc:'#2dd4a0',
-  CivProc:'#f5a623', Contracts:'#5ac8f0', CrimProc:'#f0965a', Evidence:'#c4d64f',
-  ManAcc:'#3fbf7f', PIL:'#b47df7', Tutoring:'#ff6b9d', Admin:'#a0a4b8'
-};
+// module colours come from calendar.css (--m-<module>) so they can be darker on cream
+const CV_MODULE_COLORS = Object.fromEntries(
+  ['BOIL','CrimJust','CrimLaw','FinAcc','CivProc','Contracts','CrimProc','Evidence','ManAcc','PIL','Tutoring','Admin']
+    .map(m => [m, 'var(--m-' + m + ')']));
 const CV_DAYNAMES = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
 let cvView = (function () {

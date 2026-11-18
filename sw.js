@@ -4,7 +4,7 @@
    and falls back to the saved copy when you're offline.
    Bump VERSION whenever you upload changed files.
    ============================================================ */
-const VERSION = 'dashboard-v1';
+const VERSION = 'dashboard-v4';
 const SHELL = [
   './', 'index.html', 'calendar.css', 'calendar.js', 'config.js', 'sync-shim.js', 'sync.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'
@@ -25,7 +25,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   const sameOrigin = url.origin === self.location.origin;
-  const firebaseLib = url.hostname === 'www.gstatic.com' && url.pathname.startsWith('/firebasejs/');
+  const firebaseLib = (url.hostname === 'www.gstatic.com' && url.pathname.startsWith('/firebasejs/')) ||
+    url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com'; // + the Nunito font
   if (!sameOrigin && !firebaseLib) return; // timetable, Firebase data etc. go straight to the internet
 
   if (firebaseLib) {

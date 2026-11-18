@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Dashboard</title>
-<meta name="theme-color" content="#141720">
+<meta name="theme-color" content="#efe6d2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Dashboard">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
 <script src="config.js"></script>
 <script src="sync-shim.js"></script>
 
@@ -627,14 +630,14 @@ select option{background:var(--bg-secondary)}
   </div>
 
   <!-- Controls -->
-  <div class="bar-section" style="gap:6px">
+  <div class="bar-section bar-controls" style="gap:6px">
+    <span class="bar-break"></span>
     <button class="bar-btn" onclick="switchView('tasks')" id="nav-tasks-btn">Tasks</button>
     <button class="bar-btn" onclick="switchView('deadlines')" id="nav-deadlines-btn">Deadlines</button>
     <button class="bar-btn" onclick="switchView('calendar')" id="nav-cal-btn">Calendar</button>
     <button class="bar-btn" onclick="switchView('notes')" id="nav-notes-btn">Notes</button>
 	<button class="bar-btn" onclick="switchView('italy')" id="nav-italy-btn">Italy 2028</button>
-    <button id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-    <button id="settings-btn" onclick="openSettings()" title="Settings and sync">⚙<span id="sync-dot"></span></button>
+    <span class="bar-menu-wrap"><button id="settings-btn" onclick="openSettings()" title="Menu" aria-label="Menu"><span class="menu-bars"><i></i><i></i><i></i></span><span id="sync-dot"></span></button></span>
   </div>
 </div>
 
@@ -1158,7 +1161,15 @@ select option{background:var(--bg-secondary)}
      ============================================================ -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal-box cv-modal cv-settings">
-    <div class="modal-title">SETTINGS</div>
+    <div class="modal-title">MENU</div>
+
+    <div class="cv-set-section">
+      <div class="cv-set-head">Appearance</div>
+      <div class="cv-seg set-theme" id="set-theme">
+        <button data-t="light" onclick="setTheme('light')">Light</button>
+        <button data-t="dark" onclick="setTheme('dark')">Dark</button>
+      </div>
+    </div>
 
     <div class="cv-set-section">
       <div class="cv-set-head">Account &amp; sync</div>
@@ -1228,7 +1239,7 @@ function save() {
   localStorage.setItem('ed_deadlines', JSON.stringify(deadlines));
   localStorage.setItem('ed_events', JSON.stringify(calEvents));
   localStorage.setItem('ed_notes', notes);
-  localStorage.setItem('ed_theme', theme);
+  localStorage.setItem('ed_theme_v2', theme);
 }
 
 function load() {
@@ -1236,7 +1247,7 @@ function load() {
   deadlines = JSON.parse(localStorage.getItem('ed_deadlines') || '{}');
   calEvents = JSON.parse(localStorage.getItem('ed_events') || '{}');
   notes = localStorage.getItem('ed_notes') || '';
-  theme = localStorage.getItem('ed_theme') || 'dark';
+  theme = localStorage.getItem('ed_theme_v2') || 'light'; // light = cream
 }
 
 /* ============================================================
@@ -1245,7 +1256,7 @@ function load() {
 function init() {
   load();
   document.documentElement.setAttribute('data-theme', theme);
-  document.getElementById('theme-toggle').textContent = theme === 'dark' ? '🌙' : '☀️';
+  setThemeColor();
   document.getElementById('notes-area').value = notes;
   renderAllLists();
   renderDeadlines();
@@ -1272,7 +1283,10 @@ function startClock() {
 }
 function updateClock() {
   const now = new Date();
-  document.getElementById('bar-date').textContent = now.toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  const longDate = window.innerWidth <= 560; // phone: "Wednesday, 18 November 2026"
+  document.getElementById('bar-date').textContent = now.toLocaleDateString('en-ZA', longDate
+    ? {weekday:'long',day:'numeric',month:'long',year:'numeric'}
+    : {weekday:'short',day:'numeric',month:'short',year:'numeric'});
   document.getElementById('bar-time').textContent = now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
 }
 
@@ -1584,11 +1598,21 @@ document.addEventListener('keydown', e => {
 /* ============================================================
    THEME
    ============================================================ */
-function toggleTheme() {
-  theme = theme === 'dark' ? 'light' : 'dark';
+function toggleTheme() { setTheme(theme === 'dark' ? 'light' : 'dark'); }
+
+// Light (cream) or Dark, chosen in the menu. Remembered per device.
+function setTheme(t) {
+  theme = t === 'dark' ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', theme);
-  document.getElementById('theme-toggle').textContent = theme === 'dark' ? '🌙' : '☀️';
   save();
+  setThemeColor();
+}
+
+// colour of the phone's status bar / browser bar
+function setThemeColor() {
+  const m = document.querySelector('meta[name=theme-color]');
+  if (m) m.setAttribute('content', theme === 'dark' ? '#141720' : '#efe6d2');
+  document.querySelectorAll('#set-theme button').forEach(b => b.classList.toggle('active', b.dataset.t === theme));
 }
 
 /* ============================================================

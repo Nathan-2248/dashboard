@@ -113,7 +113,7 @@ html,body{background:var(--bg-primary)}
 .cv-hlabel{height:var(--hour-h);font-size:10px;font-family:var(--font-mono);color:var(--text-muted);text-align:right;padding-right:6px;transform:translateY(-7px)}
 .cv-col{position:relative;border-left:1px solid var(--border);height:calc(var(--hour-h) * 24);cursor:pointer;
   background-image:linear-gradient(to bottom,var(--border) 1px,transparent 1px);background-size:100% var(--hour-h)}
-.cv-col.today{background-color:color-mix(in srgb,var(--accent-blue) 7%,transparent)}
+.cv-col.today{background-color:color-mix(in srgb,var(--accent-green) 7%,transparent)}
 .cv-ev{
   position:absolute;border-radius:5px;padding:2px 5px;overflow:hidden;font-size:11px;line-height:1.3;
   border-left:3px solid var(--c);background:color-mix(in srgb,var(--c) 22%,var(--bg-card));color:var(--text-primary);
@@ -180,3 +180,219 @@ html,body{background:var(--bg-primary)}
 .auth-box input{font-size:16px;width:100%}
 .auth-sub{text-align:center;font-size:13px;color:var(--text-secondary);margin-bottom:6px}
 .auth-link{font-size:12px;color:var(--text-muted);text-decoration:underline}
+
+/* ============================================================
+   CREAM THEME (the light theme; the moon button switches to dark)
+   ============================================================ */
+[data-theme="light"]{
+  --bg-primary:#f6f0e3;
+  --bg-secondary:#efe6d2;
+  --bg-card:#fffbf3;
+  --bg-hover:#f3ead8;
+  --border:#e3d8c2;
+  --border-light:#d4c6aa;
+  --text-primary:#2e2922;
+  --text-secondary:#6b6153;
+  --text-muted:#9a8f7d;
+  --accent-blue:#3a6fd8;
+  --accent-blue-dim:rgba(58,111,216,0.10);
+  --accent-green:#2f8a5b;
+  --accent-green-dim:rgba(47,138,91,0.12);
+  --accent-orange:#c9800f;
+  --accent-orange-dim:rgba(201,128,15,0.12);
+  --accent-red:#c94545;
+  --accent-red-dim:rgba(201,69,69,0.10);
+  --status-none:#c4b9a4;
+  --shadow:0 1px 8px rgba(80,60,30,0.08);
+  --tt-color:#7c62d6;
+}
+[data-theme="light"] #top-bar{box-shadow:0 1px 10px rgba(80,60,30,0.08)}
+[data-theme="light"] .modal-overlay{background:rgba(46,41,34,0.45)}
+[data-theme="light"] ::-webkit-scrollbar-track{background:var(--bg-primary)}
+
+/* ============================================================
+   ONE GREEN FOR EVERY ADD / SAVE BUTTON
+   ============================================================ */
+:root{--btn-green:#2f8a5b;--btn-green-text:#ffffff}
+[data-theme="dark"]{--btn-green:#2dd4a0;--btn-green-text:#0d0f12}
+.btn-add,.btn-add.green,.btn-primary,.cv-seg button.active,.nav-tab.active{
+  background:var(--btn-green) !important;color:var(--btn-green-text) !important;
+}
+.bar-btn.active{background:var(--accent-green-dim);border-color:var(--btn-green);color:var(--btn-green)}
+.bar-btn:hover{border-color:var(--btn-green);color:var(--btn-green)}
+input:focus,textarea:focus,select:focus{border-color:var(--btn-green)}
+
+/* ============================================================
+   PHONE TOP BAR
+   Scrolls away with the page (so iOS doesn't blur it under the
+   status bar), no clock, keeps the date and the countdown.
+   ============================================================ */
+@media(max-width:820px){
+  #top-bar{position:relative;padding-top:max(var(--safe-top),8px)}
+}
+@media(max-width:560px){
+  #bar-time{display:none}
+  #top-bar{padding:max(var(--safe-top),10px) 6px 4px}
+  .bar-section:first-child{flex-direction:column;align-items:flex-start;gap:0;padding-top:4px;padding-bottom:4px}
+  .bar-logo{font-size:15px}
+  #bar-date{font-size:12px;color:var(--text-secondary)}
+  .bar-section:nth-child(2){padding-right:4px}
+  .bar-stat{align-items:flex-end}
+  #bar-home-countdown{font-size:14px !important}
+}
+
+/* ============================================================
+   MODULE COLOURS (dark mode = original; cream = darker so they read)
+   ============================================================ */
+:root,[data-theme="dark"]{
+  --m-BOIL:#4f8ef7; --m-CrimJust:#9b7df7; --m-CrimLaw:#e05c5c; --m-FinAcc:#2dd4a0;
+  --m-CivProc:#f5a623; --m-Contracts:#5ac8f0; --m-CrimProc:#f0965a; --m-Evidence:#c4d64f;
+  --m-ManAcc:#3fbf7f; --m-PIL:#b47df7; --m-Tutoring:#ff6b9d; --m-Admin:#a0a4b8;
+  --day-fri:#5ac8f0; --day-sat:#f0965a;
+}
+[data-theme="light"]{
+  --m-BOIL:#2457b8; --m-CrimJust:#5b3fb5; --m-CrimLaw:#b02e2e; --m-FinAcc:#0d7a6a;
+  --m-CivProc:#a55f00; --m-Contracts:#16708f; --m-CrimProc:#b4501f; --m-Evidence:#5f6b0c;
+  --m-ManAcc:#2f7a24; --m-PIL:#7f35a8; --m-Tutoring:#b5245f; --m-Admin:#555b6c;
+  --day-fri:#16708f; --day-sat:#b4501f;
+}
+.module-tag[data-module]{font-weight:700}
+.module-tag[data-module="BOIL"]{--mc:var(--m-BOIL)}
+.module-tag[data-module="CrimJust"]{--mc:var(--m-CrimJust)}
+.module-tag[data-module="CrimLaw"]{--mc:var(--m-CrimLaw)}
+.module-tag[data-module="FinAcc"]{--mc:var(--m-FinAcc)}
+.module-tag[data-module="CivProc"]{--mc:var(--m-CivProc)}
+.module-tag[data-module="Contracts"]{--mc:var(--m-Contracts)}
+.module-tag[data-module="CrimProc"]{--mc:var(--m-CrimProc)}
+.module-tag[data-module="Evidence"]{--mc:var(--m-Evidence)}
+.module-tag[data-module="ManAcc"]{--mc:var(--m-ManAcc)}
+.module-tag[data-module="PIL"]{--mc:var(--m-PIL)}
+.module-tag[data-module="Tutoring"]{--mc:var(--m-Tutoring)}
+.module-tag[data-module="Admin"]{--mc:var(--m-Admin)}
+.module-tag[data-module]{color:var(--mc);background:color-mix(in srgb,var(--mc) 12%,transparent);border-color:color-mix(in srgb,var(--mc) 35%,transparent)}
+/* day headings that had fixed light colours */
+/* (day heading colours are set further down: all green) */
+
+/* ============================================================
+   NUNITO EVERYWHERE
+   ============================================================ */
+:root{--font-mono:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif}
+body{font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif}
+#bar-home-countdown,#bar-time,.chip-countdown,.deadline-countdown,.it-b-saved{font-variant-numeric:tabular-nums}
+.bar-logo{font-weight:800;letter-spacing:.5px}
+
+/* ============================================================
+   MENU BUTTON (three stripes) + LIGHT/DARK CHOICE
+   ============================================================ */
+#settings-btn{width:auto;height:32px;border-radius:var(--radius);padding:0 10px;gap:6px}
+.menu-bars{display:flex;flex-direction:column;justify-content:space-between;width:18px;height:13px}
+.menu-bars i{display:block;height:2px;border-radius:1px;background:currentColor}
+#settings-btn:hover{border-color:var(--btn-green);color:var(--btn-green)}
+.set-theme{display:inline-flex}
+.set-theme button{padding:7px 22px;font-size:13px}
+
+/* Phone top bar: [Task Manager + date] [countdown, centred] [menu]
+   then the tabs on their own row, then deadlines */
+.bar-break{display:none}
+.bar-menu-wrap{display:contents}
+@media(max-width:560px){
+  #top-bar{column-gap:0;row-gap:4px;align-items:center}
+  .bar-section:first-child{flex:1 1 0;min-width:0}
+  .bar-section:nth-child(2){flex:0 0 auto;padding:6px 4px}
+  .bar-stat{align-items:center}
+  .bar-section.bar-controls{display:contents}
+  .bar-controls .bar-menu-wrap{display:flex;order:1;flex:1 1 0;justify-content:flex-end;padding-right:6px}
+  .bar-controls #settings-btn{height:36px;padding:0 11px}
+  .bar-controls .bar-break{display:block;order:2;flex-basis:100%;height:0}
+  .bar-controls .bar-btn{order:3;margin:2px 3px 6px;padding:6px 9px;font-size:12px}
+  .bar-section.grow{order:4}
+}
+
+/* Task list headings (Master List, Monday…Sunday): same green as the buttons, bold */
+.list-card-title{color:var(--btn-green) !important;font-weight:800;letter-spacing:1px}
+
+/* Phone top bar:
+   row 1: Task Manager  Wednesday, 18 November 2026        [menu]
+   row 2: COUNTDOWN TO HOME  7d 21h 46m 43s
+   row 3: tabs   row 4: deadlines */
+@media(max-width:560px){
+  .bar-section:first-child{flex:1 1 auto;flex-direction:row;align-items:baseline;gap:10px;min-width:0;padding:6px 8px 2px}
+  .bar-section:first-child > div{min-width:0}
+  #bar-date{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar-controls .bar-menu-wrap{flex:0 0 auto;order:1}
+  .bar-section:nth-child(2){order:2;flex:0 0 100%;justify-content:flex-start;padding:0 8px 6px}
+  .bar-stat{flex-direction:row-reverse;align-items:baseline;justify-content:flex-end;gap:8px}
+  .bar-stat-label{font-size:11px;letter-spacing:.5px}
+  .bar-controls .bar-break{display:none}
+}
+
+/* Phone: no "Task Manager" or date; the countdown sits at the top with the menu on the right */
+@media(max-width:560px){
+  .bar-section:first-child{display:none}
+  .bar-section:nth-child(2){order:0;flex:1 1 auto;padding:8px 8px}
+  .bar-stat-value{font-size:16px !important}
+  .bar-controls .bar-break{display:block;order:2;flex-basis:100%;height:0}
+}
+
+/* Phone: "Task Manager" back (no date), menu on the right; countdown on the row below */
+@media(max-width:560px){
+  .bar-section:first-child{display:flex;order:0;flex:1 1 auto;padding:8px 8px 2px}
+  #bar-date{display:none}
+  .bar-section:nth-child(2){order:2;flex:0 0 100%;padding:0 8px 6px}
+  .bar-controls .bar-break{order:2;flex-basis:100%}
+  .bar-controls .bar-btn{order:3}
+}
+
+/* ============================================================
+   SQUARE CORNERS everywhere except the calendar
+   (circles that are meant to be circles stay round)
+   ============================================================ */
+:where(*:not(#view-calendar):not(#view-calendar *)),
+:where(*:not(#view-calendar):not(#view-calendar *))::before,
+:where(*:not(#view-calendar):not(#view-calendar *))::after{border-radius:0 !important}
+.status-btn,.deadline-dot,#sync-dot,.cv-sw{border-radius:50% !important}
+
+/* ============================================================
+   MONTH VIEW AS ROUNDED DAY TILES (like the original calendar)
+   ============================================================ */
+.cv-month{border:none;background:none;overflow:visible}
+.cv-mhead{background:none;border:none;gap:8px;margin-bottom:4px}
+.cv-mhead div{padding:2px 10px}
+.cv-mgrid{gap:8px;grid-auto-rows:minmax(118px,auto)}
+.cv-mcell,.cv-mcell:nth-child(7n){
+  border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--bg-card);
+  padding:8px;box-shadow:var(--shadow);
+}
+.cv-mcell:hover{border-color:var(--border-light);background:var(--bg-hover)}
+.cv-mcell.other{background:var(--bg-card);opacity:.55}
+.cv-mcell.today{border-color:var(--btn-green);background:color-mix(in srgb,var(--btn-green) 10%,var(--bg-card))}
+.cv-chip{border-radius:0 4px 4px 0;border-left:2px solid transparent}
+@media(max-width:560px){
+  .cv-mhead,.cv-mgrid{gap:4px}
+  .cv-mgrid{grid-auto-rows:minmax(70px,auto)}
+  .cv-mcell,.cv-mcell:nth-child(7n){padding:3px;border-radius:8px}
+  .cv-mhead div{padding:2px 3px;font-size:9px}
+}
+
+/* Module tags (BOIL, CrimLaw…) keep their rounded pill shape */
+.module-tag[data-module],.module-tag{border-radius:10px !important}
+/* The three-stripe menu button keeps rounded corners */
+#settings-btn{border-radius:var(--radius) !important}
+#sync-dot{border-radius:50% !important}
+
+/* Phone tabs: plain text on cream, thin vertical lines between them, spread across the full width */
+@media(max-width:560px){
+  .bar-controls .bar-btn{
+    order:3;flex:1 1 0;margin:0 0 6px;padding:8px 2px;text-align:center;font-size:13px;
+    background:transparent;border:none;border-left:1px solid var(--border-light);color:var(--text-secondary);
+  }
+  .bar-controls .bar-btn:first-of-type{border-left:none}
+  .bar-controls .bar-btn.active{background:transparent;color:var(--btn-green);font-weight:800;border-color:var(--border-light)}
+  .bar-controls .bar-btn:hover{border-color:var(--border-light)}
+}
+/* Rounded again: deadline chips in the top bar, and the task-count bubbles */
+.deadline-chip{border-radius:20px !important}
+.deadline-dot{border-radius:50% !important}
+.list-badge,.it-count{border-radius:10px !important}
+/* "Task Manager" in the same green as the buttons and headings */
+.bar-logo{color:var(--btn-green) !important}
