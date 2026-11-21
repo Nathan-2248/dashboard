@@ -6,7 +6,8 @@
    ============================================================ */
 (function () {
   const KEYS = ['ed_tasks', 'ed_deadlines', 'ed_events', 'ed_notes', 'ed_settings',
-                'ed_italy_words', 'ed_italy_phrases', 'ed_italy_notes', 'ed_italy_budget'];
+                'ed_italy_words', 'ed_italy_phrases', 'ed_italy_notes', 'ed_italy_budget',
+                'ed_italy_grammar'];
   const META = 'ed_sync_meta';
   const proto = Storage.prototype;
   const origSet = proto.setItem, origGet = proto.getItem, origRemove = proto.removeItem;

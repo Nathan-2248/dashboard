@@ -991,30 +991,10 @@ select option{background:var(--bg-secondary)}
         </div>
       </div>
 
-      <!-- RIGHT TOP: Flashcards -->
+      <!-- RIGHT TOP: Grammar notes -->
       <div class="it-panel">
-        <div class="it-panel-title">Flashcards</div>
-        <div class="it-flash-controls">
-          <select id="it-flash-source">
-            <option value="both">Words + phrases</option>
-            <option value="words">Words only</option>
-            <option value="phrases">Phrases only</option>
-          </select>
-          <select id="it-flash-dir">
-            <option value="en-it">English → Italian</option>
-            <option value="it-en">Italian → English</option>
-          </select>
-          <button class="small-btn" id="it-flash-next">Next card</button>
-        </div>
-        <div class="it-card" id="it-card">
-          <div class="it-front" id="it-front">Add some words to start</div>
-          <div class="it-back" id="it-back"></div>
-          <div class="it-hint" id="it-hint"></div>
-        </div>
-        <div class="it-flash-foot">
-          <span id="it-flash-count"></span>
-          <span>Say it out loud before you flip</span>
-        </div>
+        <div class="it-panel-title">Grammar</div>
+        <textarea class="it-notes" id="it-grammar" placeholder="Grammar rules to remember, e.g. il / lo / la / i / gli / le, verb endings, tricky prepositions…"></textarea>
       </div>
 
       <!-- RIGHT BOTTOM: Notes (left) + Savings tracker (right) -->
@@ -1022,7 +1002,7 @@ select option{background:var(--bg-secondary)}
 
 <div class="it-panel">
   <div class="it-panel-title">Notes &amp; places to go</div>
-  <textarea class="it-notes" id="it-notes" placeholder="Travel ideas, places, grammar quirks, anything…"></textarea>
+  <textarea class="it-notes" id="it-notes" placeholder="Travel ideas, places, anything…"></textarea>
 </div>
 
 <div class="it-panel" id="it-b-panel">
@@ -1615,7 +1595,7 @@ function setThemeColor() {
    ITALY 2028
    ============================================================ */
 (function () {
-  const KEY = { words:'ed_italy_words', phrases:'ed_italy_phrases', notes:'ed_italy_notes' };
+  const KEY = { words:'ed_italy_words', phrases:'ed_italy_phrases', notes:'ed_italy_notes', grammar:'ed_italy_grammar' };
   const $it = id => document.getElementById(id);
 
   const itLoad = (k, fallback) => {
@@ -1666,7 +1646,6 @@ function setThemeColor() {
   function renderAll() {
     renderList($it('it-word-list'), words, 'words');
     renderList($it('it-phrase-list'), phrases, 'phrases');
-    updateCount();
   }
 
   function addEntry(type, enId, itId) {
@@ -1696,56 +1675,13 @@ function setThemeColor() {
     $it(id).addEventListener('keydown', e => { if (e.key === 'Enter') addEntry('phrases', 'it-phrase-en', 'it-phrase-it'); }));
   $it('it-search').addEventListener('input', renderAll);
 
-  /* ---------- Flashcards ---------- */
-  let current = null, flipped = false;
-
-  function pool() {
-    const s = $it('it-flash-source').value;
-    if (s === 'words') return words;
-    if (s === 'phrases') return phrases;
-    return words.concat(phrases);
-  }
-  function updateCount() { $it('it-flash-count').textContent = pool().length + ' cards in deck'; }
-
-  function nextCard() {
-    const p = pool();
-    flipped = false;
-    if (!p.length) {
-      current = null;
-      $it('it-front').textContent = 'Add some words to start';
-      $it('it-back').textContent = '';
-      $it('it-hint').textContent = '';
-      return;
-    }
-    let pick;
-    do { pick = p[Math.floor(Math.random() * p.length)]; } while (p.length > 1 && pick === current);
-    current = pick;
-    const enFirst = $it('it-flash-dir').value === 'en-it';
-    $it('it-front').textContent = enFirst ? current.en : current.it;
-    $it('it-back').textContent = '';
-    $it('it-hint').textContent = 'Click the card to reveal';
-  }
-
-  function flip() {
-    if (!current) return;
-    const enFirst = $it('it-flash-dir').value === 'en-it';
-    if (!flipped) {
-      $it('it-back').textContent = enFirst ? current.it : current.en;
-      $it('it-hint').textContent = 'Click again for next card';
-      flipped = true;
-    } else {
-      nextCard();
-    }
-  }
-
-  $it('it-card').onclick = flip;
-  $it('it-flash-next').onclick = nextCard;
-  $it('it-flash-source').onchange = () => { updateCount(); nextCard(); };
-  $it('it-flash-dir').onchange = nextCard;
-
   /* ---------- Notes (autosave) ---------- */
   $it('it-notes').value = itLoad(KEY.notes, '');
   $it('it-notes').addEventListener('input', e => itSave(KEY.notes, e.target.value));
+
+  /* ---------- Grammar notes (autosave) ---------- */
+  $it('it-grammar').value = itLoad(KEY.grammar, '');
+  $it('it-grammar').addEventListener('input', e => itSave(KEY.grammar, e.target.value));
 
   /* ---------- Savings tracker ---------- */
   const BKEY = 'ed_italy_budget';
@@ -1836,13 +1772,13 @@ applyHide();
     budget  = itLoad(BKEY, { goal: 50000, entries: [] });
     $it('it-b-goal-input').value = budget.goal;
     if (document.activeElement !== $it('it-notes')) $it('it-notes').value = itLoad(KEY.notes, '');
+    if (document.activeElement !== $it('it-grammar')) $it('it-grammar').value = itLoad(KEY.grammar, '');
     renderBudget();
     renderAll();
   };
 
   renderBudget();
   renderAll();
-  nextCard();
 })();
 init();
 </script>
